@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+    nginx:
+        container_name: nginx
+        build: requirements/nginx/
+        image: nginx:lbenedar
+        depends_on:
+            - wordpress
+        ports:
+            - 443:443
+        restart: always
+        volumes:
+            - wordpress:/var/www/html
+        networks:
+            - inc_serv
+    mariadb:
+        container_name: mariadb
+        build: requirements/mariadb/
+        image: mariadb:lbenedar
+        volumes:
+            - mariadb:/var/lib/mysql
+        env_file:
+            - .env
+        restart: always
+        networks:
+            - inc_serv
+    wordpress:
+        container_name: wordpress
+        build: requirements/wordpress/
+        image: wordpress:lbenedar
+        depends_on:
+            - mariadb
+        env_file:
+            - .env
+        restart: always
+        volumes:
+            - wordpress:/var/www/html
+        networks:
+            - inc_serv
+volumes:
+    wordpress:
+        name: wp_vol
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '/home/lbenedar/data/wordpress'
+    mariadb:
+        name: mdb_vol
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '/home/lbenedar/data/mariadb'
+networks:
+    inc_serv:
+        name: inc_serv
+        driver: bridge
+    
+        
